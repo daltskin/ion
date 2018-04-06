@@ -3,6 +3,10 @@ sudo: required
 services:
 - docker
 
+branches:
+  only:
+    - master
+
 script:
 - chmod +x ci.sh && sudo ./ci.sh
 # Only deploy docker images on master

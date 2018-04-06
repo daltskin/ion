@@ -6,8 +6,7 @@ import (
 	"testing"
 )
 
-func TestPod2DockerVolumeGenerated(t *testing.T) {
-
+func getDockerCommand() string {
 	containers := []apiv1.Container{
 		{
 			Name:  "sidecar",
@@ -48,8 +47,32 @@ func TestPod2DockerVolumeGenerated(t *testing.T) {
 	})
 
 	if err != nil {
-		t.Error(err)
+		panic(err)
 	}
+
+	return podCommand
+}
+
+func TestPod2DockerVolumeGenerated(t *testing.T) {
+
+	podCommand := getDockerCommand()
+
+	// Todo: Very basic smoke test that shared volume path is present in batch command
+	if !strings.Contains(podCommand, "/ion") {
+		t.Log(podCommand)
+		t.Error("Missing shared volume")
+	}
+
+	// Todo: Very basic smoke test that shared volume path is present in batch command
+	if !strings.Contains(podCommand, "docker volume create examplemessageID_ionvolume") {
+		t.Log(podCommand)
+		t.Error("Missing shared volume")
+	}
+}
+
+func TestPod2DockerVolumeGenerated(t *testing.T) {
+
+	podCommand := getDockerCommand()
 
 	// Todo: Very basic smoke test that shared volume path is present in batch command
 	if !strings.Contains(podCommand, "/ion") {
@@ -65,33 +88,15 @@ func TestPod2DockerVolumeGenerated(t *testing.T) {
 }
 
 func TestPod2DockerGeneratesValidOutputEncoding(t *testing.T) {
-	containers := []apiv1.Container{
-		{
-			Name:  "sidecar",
-			Image: "barry",
-			Args:  []string{"encoding"},
-		},
-		{
-			Name:            "worker",
-			Image:           "marge",
-			ImagePullPolicy: apiv1.PullAlways,
-		},
-	}
 
-	// Todo: Pull this out into a standalone package once stabilized
-	podCommand, err := getPodCommand(batchPodComponents{
-		Containers: containers,
-		PodName:    mockMessageID,
-		TaskID:     mockMessageID,
-		Volumes:    nil,
-	})
-
-	if err != nil {
-		t.Error(err)
-	}
+	podCommand := getDockerCommand()
 
 	t.Log(podCommand)
 	if strings.Contains(podCommand, "&lt;") {
 		t.Error("output contains incorrect encoding")
 	}
+}
+
+func TestExecutionOfPod2DockerCommand(t *Testing.T) {
+	panic("Finish me!")
 }

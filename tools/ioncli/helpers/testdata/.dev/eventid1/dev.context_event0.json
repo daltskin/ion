@@ -1,0 +1,19 @@
+{
+    "name": "testmodulename1",
+    "eventId": "d55a6cf9-665b-4f4e-9d64-c18d6c97fb65",
+    "correlationId": "corrid1",
+    "parentEventId": "",
+    "files": [
+        "image0.png"
+    ],
+    "data": [
+        {
+            "key": "files",
+            "value": "image0.png"
+        },
+        {
+            "key": "files",
+            "value": "image0.png"
+        }
+    ]
+}

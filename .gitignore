@@ -1,2 +1,5 @@
 tools/publishevent/main.go
 tools/publishevent/publishevent
+sidecar/sidecar
+tools/ioncli/ioncli
+tools/ioncli/helpers/debug.test

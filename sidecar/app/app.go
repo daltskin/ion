@@ -475,6 +475,7 @@ func (a *App) CommitEvents(eventsPath string, blobURIs map[string]string) error 
 			CorrelationID: a.context.CorrelationID,
 			ParentEventID: a.context.EventID,
 			EventID:       eventID,
+			Name:          a.context.Name,
 		}
 
 		// Create a new event to publish
@@ -509,7 +510,7 @@ func (a *App) CommitEvents(eventsPath string, blobURIs map[string]string) error 
 		}
 		if a.development {
 			_ = writeDevFile("context_"+fileName, a.context.EventID, eventContext)
-			_ = writeDevFile("event_"+fileName, a.context.EventID, eventContext)
+			_ = writeDevFile("event_"+fileName, a.context.EventID, event)
 		}
 	}
 	return nil

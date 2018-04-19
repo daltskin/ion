@@ -1,0 +1,11 @@
+{
+    "context": {
+        "name": "testmodulename1",
+        "eventId": "d55a6cf9-665b-4f4e-9d64-c18d6c97fb65",
+        "correlationId": "corrid1",
+        "parentEventId": "eventid1"
+    },
+    "type": "face_detected",
+    "previousStages": [],
+    "data": null
+}

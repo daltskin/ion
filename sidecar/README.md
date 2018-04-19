@@ -81,6 +81,12 @@ Development mode allows you to run the sidecar without the Dispatcher. This will
 
 Development mode will also dump data of interest out to a `dev` folder to help you debug issues.
 
+** Linux Bash **
+
+```bash 
+./sidecar --loglevel=debug --development --context.correlationid=corrid1 --context.eventid=eventid1 --context.name=testmodulename1 --printconfig --sharedsecret=dev --basedir=/home/yourhomedir/ionsidecar
+```
+
 > **Coming Soon:** Offline Mode - use a local Dispatcher to simulate Ion without any external services.
 
 # Data Handling

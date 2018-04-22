@@ -3,6 +3,7 @@ package helpers
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/lawrencegripper/ion/common"
@@ -12,7 +13,7 @@ import (
 const event0ID = "d55a6cf9-665b-4f4e-9d64-c18d6c97fb65"
 
 func TestGetEvents_ReturnsExpectedEventCount(t *testing.T) {
-	events, err := GetEvents("./testdata/.dev")
+	events, err := GetEventsFromDev("./testdata/.dev")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -24,7 +25,7 @@ func TestGetEvents_ReturnsExpectedEventCount(t *testing.T) {
 }
 
 func TestGetEvents_SpecificEventHasCorrectValues(t *testing.T) {
-	events, err := GetEvents("./testdata/.dev")
+	events, err := GetEventsFromDev("./testdata/.dev")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -42,7 +43,7 @@ func TestGetEvents_SpecificEventHasCorrectValues(t *testing.T) {
 }
 
 func TestGetEvents_HasCorrentFullFilePaths(t *testing.T) {
-	events, err := GetEvents("./testdata/.dev")
+	events, err := GetEventsFromDev("./testdata/.dev")
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
@@ -86,5 +87,76 @@ func TestSaveFolderNames_CreateAndExtract(t *testing.T) {
 }
 
 func TestSaveEvent_CreatesArgs_CopysBlobs_CreatesMeta(t *testing.T) {
-	t.Fail()
+	//Read an existing event from the test data
+	events, err := GetEventsFromDev("./testdata/.dev")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	event := events[event0ID]
+
+	// Test the method for save
+	tmpdir := os.TempDir()
+	err = SaveEvent("testmodule", "./testdata", tmpdir, event)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tmpdir = filepath.Join(tmpdir, getSaveEventFolderName(event))
+	//Cleanup
+	defer os.Remove(tmpdir)
+	//Check files exist
+	_, err = os.Stat(filepath.Join(tmpdir, "metadata.json"))
+	if err != nil {
+		t.Error(err)
+	}
+
+	blobdir, err := os.Stat(filepath.Join(tmpdir, "blobs"))
+	if err != nil {
+		t.Error(err)
+	}
+	if !blobdir.IsDir() {
+		t.Error("Blob dir not created")
+	}
+
+	_, err = os.Stat(filepath.Join(tmpdir, "blobs", "image0.png"))
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestGetEventsFromStore_ListsEvents(t *testing.T) {
+	//Read an existing event from the test data
+	events, err := GetEventsFromDev("./testdata/.dev")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+	event := events[event0ID]
+
+	//Save it
+	tmpdir := filepath.Join(os.TempDir(), "ionstore")
+	err = os.MkdirAll(tmpdir, 0777)
+	defer os.RemoveAll(tmpdir)
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	err = SaveEvent("testmodule", "./testdata", tmpdir, event)
+	if err != nil {
+		t.Error(err)
+	}
+
+	//Test the method for list
+	results, err := GetEventsFromStore(tmpdir)
+
+	if err != nil {
+		t.Error(err)
+	}
+	if len(results) != 1 {
+		t.Errorf("Expected 1 item got: %+v", len(results))
+	}
+
+	t.Log(results)
 }

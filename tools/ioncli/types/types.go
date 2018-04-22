@@ -18,3 +18,11 @@ type EventBundle struct {
 	EventContext *EventContext
 	DataFiles    []string
 }
+
+//SavedEventInfo describes a saved event in the event store
+type SavedEventInfo struct {
+	ModuleName    string
+	EventType     string
+	EventID       string
+	AbsFolderPath string
+}

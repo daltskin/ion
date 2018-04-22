@@ -50,7 +50,7 @@ func SaveEvent(moduleName, sidecarbasedir, savedir string, eventBundle types.Eve
 	//create args file
 	// it still needs.... --valideventtypes=face_detected --context.name=modulename
 	args := "--loglevel=debug --development --printconfig --sharedsecret=dev " +
-		"--context.eventid=" + eventBundle.Event.EventID +
+		"--context.eventid=" + eventBundle.EventContext.EventID +
 		"--basedir=" + sidecarbasedir
 
 	argsFilePath := filepath.Join(eventFolder, ".args")
@@ -62,11 +62,37 @@ func SaveEvent(moduleName, sidecarbasedir, savedir string, eventBundle types.Eve
 	return nil
 }
 
-//GetEvents enumerates the dev output from the sidecar and extracts event bundles
-func GetEvents(devDir string) (map[string]types.EventBundle, error) {
+//GetEventsFromStore Lists the events available in the local store
+func GetEventsFromStore(storeDir string) ([]types.SavedEventInfo, error) {
+	files, err := ioutil.ReadDir(storeDir)
+	if err != nil {
+		return []types.SavedEventInfo{}, err
+	}
+
+	events := make([]types.SavedEventInfo, 0, len(files))
+
+	for _, f := range files {
+		modulename, eventtype, eventID := getDetailsFromSaveFolderName(f.Name())
+		absFolderPath, err := filepath.Abs(filepath.Join(storeDir, f.Name()))
+		if err != nil {
+			return []types.SavedEventInfo{}, err
+		}
+		events = append(events, types.SavedEventInfo{
+			EventID:       eventID,
+			EventType:     eventtype,
+			ModuleName:    modulename,
+			AbsFolderPath: absFolderPath,
+		})
+	}
+
+	return events, nil
+}
+
+//GetEventsFromDev enumerates the dev output from the sidecar and extracts event bundles
+func GetEventsFromDev(devDir string) (map[string]types.EventBundle, error) {
 	bundles := map[string]types.EventBundle{}
 
-	files, err := filepath.Glob(filepath.Join(devDir, "/*/*.context_event*.json"))
+	files, err := filepath.Glob(filepath.Join(devDir, "/*/*.event_event*.json"))
 	if err != nil {
 		log.Fatal(err)
 		return bundles, err

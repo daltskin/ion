@@ -60,6 +60,11 @@ func init() {
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
+var (
+	IonCliDir         string
+	SidecarBinaryPath string
+)
+
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
@@ -99,6 +104,6 @@ func initConfig() {
 		sidecarBinary = "sidecar"
 	}
 
-	configCmd.PersistentFlags().String("sidecarbinary", path.Join(ionCliDir, sidecarBinary), "The location of the sidecar binary")
-	configCmd.PersistentFlags().String("ionclidir", ionCliDir, "The location used by the ION cli to store data and configuration")
+	configCmd.PersistentFlags().StringVar(&SidecarBinaryPath, "sidecarbinary", path.Join(ionCliDir, sidecarBinary), "The location of the sidecar binary")
+	configCmd.PersistentFlags().StringVar(&IonCliDir, "ionclidir", ionCliDir, "The location used by the ION cli to store data and configuration")
 }

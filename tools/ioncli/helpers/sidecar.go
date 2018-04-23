@@ -19,9 +19,10 @@ type SidecarRunner struct {
 }
 
 //NewBlankSidecar creates a sidecar for the first event in a pipeline with no input data.
-func NewBlankSidecar(binaryLocation, iondir, modulename, publishesevents string) (runner SidecarRunner, err error) {
+func NewBlankSidecar(binaryLocation, iondir, workingdir, modulename, publishesevents string) (runner SidecarRunner, err error) {
 	runner = SidecarRunner{binaryLocation: binaryLocation}
 	cmd := exec.Command(binaryLocation)
+	cmd.Dir = workingdir
 	var b bytes.Buffer
 	cmd.Stdout = &b
 	cmd.Stderr = &b
@@ -43,9 +44,10 @@ func NewBlankSidecar(binaryLocation, iondir, modulename, publishesevents string)
 }
 
 //NewSidecarRunnerFromEvent Responsible for starting and watching the sidecar with the right event information.
-func NewSidecarRunnerFromEvent(binaryLocation, iondir, modulename, publishesevents string, eventContext types.SavedEventInfo) (runner SidecarRunner, err error) {
+func NewSidecarRunnerFromEvent(binaryLocation, iondir, workingdir, modulename, publishesevents string, eventContext types.SavedEventInfo) (runner SidecarRunner, err error) {
 	runner = SidecarRunner{binaryLocation: binaryLocation}
 	cmd := exec.Command(binaryLocation)
+	cmd.Dir = workingdir
 	var b bytes.Buffer
 	cmd.Stdout = &b
 	cmd.Stderr = &b
@@ -86,7 +88,7 @@ func (runner *SidecarRunner) Logs() string {
 //Wait wait until "Done" is called by the module
 // then return the output from the stdio
 func (runner *SidecarRunner) Wait() (string, error) {
-	defer os.RemoveAll(".dev")
+	defer os.RemoveAll(filepath.Join(runner.cmd.Dir, ".dev"))
 
 	if runner.cmd.Process == nil {
 		return "", fmt.Errorf("process not started for sidecar or crashed")
@@ -95,7 +97,9 @@ func (runner *SidecarRunner) Wait() (string, error) {
 		if runner.cmd.ProcessState != nil && runner.cmd.ProcessState.Exited() {
 			return string(runner.combindedOutput.Bytes()), fmt.Errorf("Process completed with Exited when not expected")
 		}
-		files, err := filepath.Glob(".dev/*/dev.done")
+		glob := filepath.Join(runner.cmd.Dir, ".dev", "*", "dev.done")
+		fmt.Println("Checking glob: " + glob)
+		files, err := filepath.Glob(glob)
 		if err != nil {
 			return "", err
 		}
@@ -112,4 +116,5 @@ func (runner *SidecarRunner) Wait() (string, error) {
 		}
 		time.Sleep(10 * time.Second)
 	}
+
 }

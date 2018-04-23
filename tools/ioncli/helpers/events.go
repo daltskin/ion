@@ -15,6 +15,7 @@ import (
 
 const blobFolder = "blobs"
 const metadataFileName = "metadata.json"
+const argsFileName = ".args"
 
 //SaveEvent will persist the event as it would be in the "ion/in" folder of a module receiving it.
 func SaveEvent(moduleName, sidecarbasedir, savedir string, eventBundle types.EventBundle) error {
@@ -33,7 +34,7 @@ func SaveEvent(moduleName, sidecarbasedir, savedir string, eventBundle types.Eve
 	//copy all referenced blob folders
 	for _, absFilePath := range eventBundle.DataFiles {
 		_, filename := filepath.Split(absFilePath)
-		copy(absFilePath, absBlobFolder, filename)
+		CopyFile(absFilePath, filepath.Join(absBlobFolder, filename))
 	}
 
 	//create metadata
@@ -50,10 +51,9 @@ func SaveEvent(moduleName, sidecarbasedir, savedir string, eventBundle types.Eve
 	//create args file
 	// it still needs.... --valideventtypes=face_detected --context.name=modulename
 	args := "--loglevel=debug --development --printconfig --sharedsecret=dev " +
-		"--context.eventid=" + eventBundle.EventContext.EventID +
-		"--basedir=" + sidecarbasedir
+		"--context.eventid=" + eventBundle.EventContext.EventID + " "
 
-	argsFilePath := filepath.Join(eventFolder, ".args")
+	argsFilePath := filepath.Join(eventFolder, argsFileName)
 	err = ioutil.WriteFile(argsFilePath, []byte(args), 0777)
 	if err != nil {
 		return err
@@ -86,6 +86,22 @@ func GetEventsFromStore(storeDir string) ([]types.SavedEventInfo, error) {
 	}
 
 	return events, nil
+}
+
+//GetArgs gets the sidecar args for a stored event
+func GetArgs(s types.SavedEventInfo) ([]string, error) {
+	file, err := os.Open(filepath.Join(s.AbsFolderPath, argsFileName))
+	if err != nil {
+		return []string{}, err
+	}
+	bytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return []string{}, err
+	}
+
+	args := strings.Split(string(bytes), " ")
+
+	return args, nil
 }
 
 //GetEventsFromDev enumerates the dev output from the sidecar and extracts event bundles

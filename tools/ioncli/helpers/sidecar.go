@@ -88,17 +88,14 @@ func (runner *SidecarRunner) Logs() string {
 //Wait wait until "Done" is called by the module
 // then return the output from the stdio
 func (runner *SidecarRunner) Wait() (string, error) {
-	defer os.RemoveAll(filepath.Join(runner.cmd.Dir, ".dev"))
-
 	if runner.cmd.Process == nil {
-		return "", fmt.Errorf("process not started for sidecar or crashed")
+		return string(runner.combindedOutput.Bytes()), fmt.Errorf("process not started for sidecar or crashed")
 	}
 	for {
 		if runner.cmd.ProcessState != nil && runner.cmd.ProcessState.Exited() {
 			return string(runner.combindedOutput.Bytes()), fmt.Errorf("Process completed with Exited when not expected")
 		}
 		glob := filepath.Join(runner.cmd.Dir, ".dev", "*", "dev.done")
-		fmt.Println("Checking glob: " + glob)
 		files, err := filepath.Glob(glob)
 		if err != nil {
 			return "", err
@@ -112,7 +109,7 @@ func (runner *SidecarRunner) Wait() (string, error) {
 		}
 		fmt.Println("Sidecar running, waiting for `done` to be called...")
 		if runner.cmd.Process != nil {
-			fmt.Printf("PID: %v", runner.cmd.Process.Pid)
+			fmt.Println(fmt.Sprintf("PID: %v", runner.cmd.Process.Pid))
 		}
 		time.Sleep(10 * time.Second)
 	}

@@ -16,7 +16,9 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/apcera/termtables"
+	"github.com/lawrencegripper/ion/tools/ioncli/helpers"
 	"github.com/spf13/cobra"
 )
 
@@ -27,13 +29,19 @@ var listCmd = &cobra.Command{
 	Long: `When using "dev new" or "events start" commands events output by your module locally
 	are stored and can be viewed here.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
-		table := termtables.CreateTable()
 
-		table.AddHeaders("Name", "Age")
-		table.AddRow("John", "30")
-		table.AddRow("Sam", 18)
-		table.AddRow("Julie", 20.14)
+		events, err := helpers.GetEventsFromStore(savedEventsDir)
+		if err != nil {
+			fmt.Println("Error retreiving events raised by the module:" + err.Error())
+			return
+		}
+
+		table := termtables.CreateTable()
+		table.AddHeaders("Module", "Event Type", "Event ID")
+
+		for _, v := range events {
+			table.AddRow(v.ModuleName, v.EventType, v.EventID)
+		}
 
 		fmt.Println(table.Render())
 	},

@@ -4,18 +4,26 @@ import (
 	"net/http"
 	"os"
 	"os/user"
-	"path"
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
 )
 
 func TestSidcarRunner_blank(t *testing.T) {
-	defer os.RemoveAll(".dev")
 	usr, _ := user.Current()
-	ionDir := path.Join(usr.HomeDir, ".ion")
+	ionDir := filepath.Join(usr.HomeDir, ".ion")
+	ionWorking := filepath.Join(usr.HomeDir, ".ionsidecar")
+	os.MkdirAll(ionWorking, 0777)
+	defer os.RemoveAll(filepath.Join(ionWorking, ".dev"))
 
-	runner, err := NewBlankSidecar("./../../../sidecar/sidecar", ionDir, "testmodule", "face_detected")
+	sidecarBinary, err := filepath.Abs("./../../../sidecar/sidecar")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	runner, err := NewBlankSidecar(sidecarBinary, ionDir, ionWorking, "testmodule", "face_detected")
 	if err != nil {
 		t.Error(err)
 	}
@@ -31,6 +39,7 @@ func TestSidcarRunner_blank(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		t.Log(result)
 		wg.Done()
 	}()
 
@@ -65,9 +74,11 @@ func TestSidcarRunner_blank(t *testing.T) {
 }
 
 func TestSidcarRunner_existing(t *testing.T) {
-	defer os.RemoveAll(".dev")
 	usr, _ := user.Current()
-	ionDir := path.Join(usr.HomeDir, ".ion")
+	ionDir := filepath.Join(usr.HomeDir, ".ion")
+	ionWorking := filepath.Join(usr.HomeDir, ".ionsidecar")
+	ionDevFolder := filepath.Join(ionWorking, ".dev")
+	defer os.RemoveAll(ionDevFolder)
 
 	events, err := GetEventsFromStore("testdata/.store")
 	if err != nil {
@@ -75,7 +86,13 @@ func TestSidcarRunner_existing(t *testing.T) {
 		return
 	}
 	event := events[0]
-	runner, err := NewSidecarRunnerFromEvent("./../../../sidecar/sidecar", ionDir, "testmodule", "face_detected", event)
+
+	sidecarBinary, err := filepath.Abs("./../../../sidecar/sidecar")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	runner, err := NewSidecarRunnerFromEvent(sidecarBinary, ionDir, ionWorking, "testmodule", "face_detected", event)
 	if err != nil {
 		t.Error(err)
 		return
@@ -124,7 +141,8 @@ func TestSidcarRunner_existing(t *testing.T) {
 func TestSidcarRunner_missingBinary(t *testing.T) {
 	defer os.RemoveAll(".dev")
 	usr, _ := user.Current()
-	ionDir := path.Join(usr.HomeDir, ".ion")
+	ionDir := filepath.Join(usr.HomeDir, ".ion")
+	ionWorking := filepath.Join(usr.HomeDir, ".ion", "sidecar")
 
 	events, err := GetEventsFromStore("testdata/.store")
 	if err != nil {
@@ -132,7 +150,7 @@ func TestSidcarRunner_missingBinary(t *testing.T) {
 		return
 	}
 	event := events[0]
-	runner, err := NewSidecarRunnerFromEvent("doesntexist", ionDir, "testmodule", "face_detected", event)
+	runner, err := NewSidecarRunnerFromEvent("doesntexist", ionDir, ionWorking, "testmodule", "face_detected", event)
 	if err != nil {
 		t.Error(err)
 		return

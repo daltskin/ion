@@ -35,15 +35,15 @@ var newCmd = &cobra.Command{
 			fmt.Println("Input file error:" + err.Error())
 			return
 		}
-		if fileinfo.IsDir() {
+		if !fileinfo.IsDir() {
 			fmt.Println("Expected input to be a directory")
 		}
 
-		ionBaseDir := filepath.Join(IonCliDir, ".ionBaseDir")
 		fmt.Println("Set the following environment variables before running more module:")
 		fmt.Println("	export SHARED_SECRET=dev")
-		fmt.Println("	export ION_BASE_DIR=" + ionBaseDir)
+		fmt.Println("	export SIDECAR_BASE_DIR=" + ionBaseDir)
 		fmt.Println("	export SIDECAR_PORT=8080")
+		os.RemoveAll(filepath.Join(workingDir, ".dev"))
 		//cleanup
 		err = os.RemoveAll(ionBaseDir)
 		if err != nil {
@@ -51,11 +51,6 @@ var newCmd = &cobra.Command{
 			return
 		}
 
-		err = os.MkdirAll(ionBaseDir, 0777)
-		if err != nil {
-			fmt.Println("Error creating ion base dir:" + err.Error())
-			return
-		}
 		inBlobDir := filepath.Join(ionBaseDir, "in", "blob")
 
 		err = helpers.CopyDir(inputfolder, inBlobDir)
@@ -64,7 +59,7 @@ var newCmd = &cobra.Command{
 			return
 		}
 
-		runner, err := helpers.NewBlankSidecar(SidecarBinaryPath, ionBaseDir, IonCliDir, moduleName, publishesEvents)
+		runner, err := helpers.NewBlankSidecar(SidecarBinaryPath, ionBaseDir, workingDir, moduleName, publishesEvents)
 		if err != nil {
 			fmt.Println("Error creating sidecar runner:" + err.Error())
 			return
@@ -89,14 +84,23 @@ var newCmd = &cobra.Command{
 		fmt.Println("Sidecar Logs:")
 		fmt.Println(output)
 
-		events, err := helpers.GetEventsFromDev(IonCliDir)
+		fmt.Println(workingDir)
+
+		events, err := helpers.GetEventsFromDev(filepath.Join(workingDir, ".dev"))
 		if err != nil {
 			fmt.Println("Error retreiving events raised by the module:" + err.Error())
 			return
 		}
 
-		fmt.Println("Events raised by your module:")
-		fmt.Println(events)
+		fmt.Println(fmt.Sprintf("Module raised %v events.... saving these", len(events)))
+
+		for _, e := range events {
+			err = helpers.SaveEvent(moduleName, ionBaseDir, savedEventsDir, e)
+			if err != nil {
+				fmt.Println("Error saving event:" + err.Error())
+				return
+			}
+		}
 	},
 }
 

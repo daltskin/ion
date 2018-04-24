@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/user"
 	"path"
+	"path/filepath"
 	"runtime"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -58,11 +59,15 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }
 
 var (
 	IonCliDir         string
 	SidecarBinaryPath string
+	ionBaseDir        string
+	workingDir        string
+	savedEventsDir    string
 )
 
 // initConfig reads in config file and ENV variables if set.
@@ -106,4 +111,25 @@ func initConfig() {
 
 	configCmd.PersistentFlags().StringVar(&SidecarBinaryPath, "sidecarbinary", path.Join(ionCliDir, sidecarBinary), "The location of the sidecar binary")
 	configCmd.PersistentFlags().StringVar(&IonCliDir, "ionclidir", ionCliDir, "The location used by the ION cli to store data and configuration")
+
+	ionBaseDir = filepath.Join(IonCliDir, "baseDir")
+	workingDir = filepath.Join(IonCliDir, "sidecarWorkingDir")
+	savedEventsDir = filepath.Join(IonCliDir, "savedevents")
+
+	err = os.MkdirAll(savedEventsDir, 0777)
+	if err != nil {
+		fmt.Println("Error creating ion base dir:" + err.Error())
+		return
+	}
+
+	err = os.MkdirAll(ionBaseDir, 0777)
+	if err != nil {
+		fmt.Println("Error creating ion base dir:" + err.Error())
+		return
+	}
+	err = os.MkdirAll(workingDir, 0777)
+	if err != nil {
+		fmt.Println("Error working dir:" + err.Error())
+		return
+	}
 }

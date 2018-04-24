@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -108,7 +109,9 @@ func GetArgs(s types.SavedEventInfo) ([]string, error) {
 func GetEventsFromDev(devDir string) (map[string]types.EventBundle, error) {
 	bundles := map[string]types.EventBundle{}
 
-	files, err := filepath.Glob(filepath.Join(devDir, "/*/*.event_event*.json"))
+	glob := filepath.Join(devDir, "*", "*.event_event*.json")
+	fmt.Println("Looking for events with glob: " + glob)
+	files, err := filepath.Glob(glob)
 	if err != nil {
 		log.Fatal(err)
 		return bundles, err

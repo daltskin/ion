@@ -66,6 +66,7 @@ func NewSidecarRunnerFromEvent(binaryLocation, iondir, workingdir, modulename, p
 	runner.cmd.Args = args
 
 	inDir := filepath.Join(iondir, "in")
+	os.RemoveAll(inDir)
 	err = os.MkdirAll(inDir, 0777)
 	if err != nil {
 		return

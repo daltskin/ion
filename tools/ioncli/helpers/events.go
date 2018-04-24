@@ -15,6 +15,7 @@ import (
 )
 
 const blobFolder = "blobs"
+const dataFolder = "data"
 const metadataFileName = "metadata.json"
 const argsFileName = ".args"
 
@@ -26,7 +27,7 @@ func SaveEvent(moduleName, sidecarbasedir, savedir string, eventBundle types.Eve
 		return err
 	}
 
-	absBlobFolder := filepath.Join(eventFolder, blobFolder)
+	absBlobFolder := filepath.Join(eventFolder, dataFolder)
 	err = os.MkdirAll(absBlobFolder, 0777)
 	if err != nil {
 		return err

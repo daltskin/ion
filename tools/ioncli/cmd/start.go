@@ -28,13 +28,8 @@ import (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Start a new module using the event output of a previous run. Use 'ioncli dev events list' to get a valid eventid",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		savedEvents, err := helpers.GetEventsFromStore(savedEventsDir)
 		if err != nil {
@@ -89,8 +84,6 @@ to quickly create a Cobra application.`,
 		fmt.Println("'Done' Called on sidecar")
 		fmt.Println("Sidecar Logs:")
 		fmt.Println(output)
-
-		fmt.Println(workingDir)
 
 		events, err := helpers.GetEventsFromDev(filepath.Join(workingDir, ".dev"))
 		if err != nil {

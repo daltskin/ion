@@ -95,6 +95,7 @@ func initConfig() {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 
+	// Configure directories to use
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println(err)
@@ -112,8 +113,8 @@ func initConfig() {
 	configCmd.PersistentFlags().StringVar(&SidecarBinaryPath, "sidecarbinary", path.Join(ionCliDir, sidecarBinary), "The location of the sidecar binary")
 	configCmd.PersistentFlags().StringVar(&IonCliDir, "ionclidir", ionCliDir, "The location used by the ION cli to store data and configuration")
 
-	ionBaseDir = filepath.Join(IonCliDir, "baseDir")
-	workingDir = filepath.Join(IonCliDir, "sidecarWorkingDir")
+	ionBaseDir = filepath.Join(IonCliDir, "basedir")
+	workingDir = filepath.Join(IonCliDir, "sidecarworkingdir")
 	savedEventsDir = filepath.Join(IonCliDir, "savedevents")
 
 	err = os.MkdirAll(savedEventsDir, 0777)

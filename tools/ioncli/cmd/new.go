@@ -84,8 +84,6 @@ var newCmd = &cobra.Command{
 		fmt.Println("Sidecar Logs:")
 		fmt.Println(output)
 
-		fmt.Println(workingDir)
-
 		events, err := helpers.GetEventsFromDev(filepath.Join(workingDir, ".dev"))
 		if err != nil {
 			fmt.Println("Error retreiving events raised by the module:" + err.Error())

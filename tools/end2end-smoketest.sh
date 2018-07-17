@@ -126,7 +126,7 @@ echo "--------------------------------------------------------"
 
 if [ "$BUILD" = false ]; then
     docker pull "$DOCKER_USER/ion-cli:$ION_IMAGE_TAG"
-    docker tag "$DOCKER_USER/ion-cli:$ION_IMAGE_TAG" ion-cli:$ION_IMAGE_TAG
+    docker tag "$DOCKER_USER/ion-cli:$ION_IMAGE_TAG" ion-cli:latest
 fi
 
 docker run --network host ion-cli module create -i frontapi.new_link -o file_downloaded -n downloader -m $DOCKER_USER/ion-module-download-file:$ION_IMAGE_TAG -p kubernetes --handler-image $DOCKER_USER/ion-handler:$ION_IMAGE_TAG
